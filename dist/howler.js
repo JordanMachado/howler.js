@@ -32,6 +32,7 @@
 
       // Create a global ID counter.
       self._counter = 1000;
+      self.globalVolume2 = 1;
 
       // Internal properties.
       self._codecs = {};
@@ -113,6 +114,13 @@
      */
     mute: function(muted) {
       var self = this || Howler;
+
+      if(muted) {
+        self.globalVolume2 = 0;
+      } else {
+        self.globalVolume2 = 1;
+      }
+
 
       // If we don't have an AudioContext created yet, run the setup.
       if (!self.ctx) {
@@ -1094,7 +1102,7 @@
             }
 
             if (self._webAudio && sound._node && !sound._muted) {
-              sound._node.gain.setValueAtTime(vol, Howler.ctx.currentTime);
+              sound._node.gain.setValueAtTime(vol * Howler.globalVolume2, Howler.ctx.currentTime);
             } else if (sound._node && !sound._muted) {
               sound._node.volume = vol * Howler.volume();
             }
@@ -1968,7 +1976,7 @@
     _cleanBuffer: function(node) {
       var self = this;
 
-      if (Howler._scratchBuffer) {
+      if (Howler._scratchBuffer && node.bufferSource) {
         node.bufferSource.onended = null;
         node.bufferSource.disconnect(0);
         try { node.bufferSource.buffer = Howler._scratchBuffer; } catch(e) {}
